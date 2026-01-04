@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NV:RP Admin Panel</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
+
+body{
+  background:radial-gradient(circle at top,#0b122f,#020617);
+  color:#e5e7eb;
+  overflow-x:hidden
+}
+
+/* ================= HEADER ================= */
+.header{
+  position:fixed;
+  top:0;left:0;right:0;
+  height:56px;
+  background:linear-gradient(90deg,#020617,#0b122f);
+  border-bottom:1px solid rgba(34,211,238,.25);
+  display:flex;
+  align-items:center;
+  padding:0 16px;
+  z-index:1100;
+}
+.menu-btn{font-size:26px;color:#22d3ee;cursor:pointer;margin-right:12px}
+.menu-btn {
+  z-index: 2000;
+  position: relative;
+}
+.header-title{font-size:18px;font-weight:bold;color:#22d3ee}
+.gear{margin-left:auto;font-size:20px;color:#22d3ee}
+
+
+/* ================= LOG SEVERITY ================= */
+
+.log-row[data-severity="info"] {
+  border-left: 4px solid #22d3ee;
+}
+
+.log-row[data-severity="warning"] {
+  border-left: 4px solid #facc15;
+}
+
+.log-row[data-severity="danger"] {
+  border-left: 4px solid #ef4444;
+}
+
+.log-row[data-severity="critical"] {
+  border-left: 4px solid #a855f7;
+}
+
+.log-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.log-group-title {
+  margin: 8px 0;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #94a3b8;
+  opacity: 0.8;
+}
+/* ================= SIDEBAR ================= */
+.sidebar{
+  position:fixed;
+  top:0;left:-260px;
+  width:260px;height:100%;
+  background:#020617;
+  border-right:1px solid rgba(34,211,238,.2);
+  padding-top:60px;
+  transition:.3s;
+  z-index:1050;
+}
+.sidebar.active{left:0}
+.sidebar a{
+  display:block;
+  padding:15px 20px;
+  color:#cbd5f5;
+  text-decoration:none;
+  border-bottom:1px solid #0f172a;
+  position:relative
+}
+.sidebar a:hover{background:#0f172a;color:#22d3ee}
+.sidebar a.active{
+  background:rgba(34,211,238,.12);
+  color:#22d3ee
+}
+.sidebar a.active::before{
+  content:"";
+  position:absolute;left:0;top:0;width:4px;height:100%;
+  background:#22d3ee;border-radius:0 4px 4px 0
+}
+
+/* ================= OVERLAY ================= */
+.overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.6);
+  display:none;
+  z-index:1000;
+}
+.overlay.active{display:block}
+
+/* ================= CONTENT ================= */
+.content{
+  position:relative;
+  z-index:1;
+  padding:76px 20px 20px;
+}
+.page{display:none}
+.page.active{display:block}
+
+/* ================= CARD ================= */
+.card{
+  background:linear-gradient(180deg,#0f172a,#020617);
+  border-radius:22px;
+  padding:22px;
+  margin-bottom:20px;
+  border:1px solid rgba(34,211,238,.15);
+  box-shadow:0 20px 40px rgba(0,0,0,.65)
+}
+
+/* ================= GRID & STATS ================= */
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;margin-top:18px}
+.stat{
+  background:rgba(2,6,23,.95);
+  border-radius:18px;
+  border:1px solid rgba(34,211,238,.2);
+  height:110px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center
+}
+.stat-label{font-size:13px;color:#94a3b8;margin-bottom:6px}
+.stat-value{font-size:20px;font-weight:bold;color:#22d3ee;white-space:nowrap}
+
+/* ================= CHARTS ================= */
+.chart-box{
+  height:180px;
+  border-radius:16px;
+  background:radial-gradient(circle,rgba(34,211,238,.25),transparent 60%);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#94a3b8
+}
+.bar-chart{display:flex;align-items:flex-end;gap:10px;height:160px}
+.bar{
+  width:20px;
+  border-radius:6px 6px 0 0;
+  background:linear-gradient(180deg,#22d3ee,#0ea5e9)
+}
+
+/* ================= LISTS ================= */
+.list{display:flex;flex-direction:column;gap:10px}
+.list-row{
+  display:flex;
+  justify-content:space-between;
+  padding:12px 14px;
+  border-radius:12px;
+  background:rgba(15,23,42,.6)
+}
+.muted{color:#6b7280}
+.red{color:#ef4444}
+
+/* ================= INPUT ================= */
+input{
+  width:100%;
+  padding:12px;
+  border-radius:12px;
+  border:none;
+  background:#020617;
+  color:#e5e7eb;
+  margin-top:12px
+}
+button{
+  width:100%;
+  padding:14px;
+  margin-top:12px;
+  border-radius:14px;
+  border:none;
+  background:linear-gradient(90deg,#22d3ee,#10b981);
+  font-weight:bold;
+  color:#022c22;
+  cursor:pointer
+}
+
+/* ===== PLAYER TABS ===== */
+.tabs{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:12px
+}
+.tab{
+  padding:12px;
+  border-radius:14px;
+  background:#020617;
+  color:#94a3b8;
+  font-weight:bold;
+  cursor:pointer;
+  text-align:center
+}
+.tab.active{
+  background:linear-gradient(90deg,#22d3ee,#10b981);
+  color:#022c22
+}
+.tab.admin{grid-column:span 2}
+.tab-page{display:none}
+.tab-page.active{display:block}
+
+/* ================= STEP 5 MODAL ================= */
+.admin-modal-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.75);
+  display:none;
+  z-index:1200;
+  align-items:center;
+  justify-content:center
+}
+.admin-modal-overlay.active{display:flex}
+.admin-modal{
+  width:90%;
+  max-width:360px;
+  background:linear-gradient(180deg,#0f172a,#020617);
+  border-radius:20px;
+  padding:22px;
+  border:1px solid rgba(34,211,238,.25)
+}
+.admin-modal h3{color:#22d3ee}
+.admin-modal p{color:#94a3b8;margin:10px 0}
+.admin-modal-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px
+}
+.admin-cancel{background:#020617;color:#94a3b8}
+.admin-confirm{background:#ef4444;color:#fff}
+
+/* ================= STEP 6 LOGS ================= */
+.log-filters{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  margin-bottom:14px
+}
+.logs-list{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  max-height:420px;
+  overflow-y:auto
+}
+.log-row{
+  display:flex;
+  justify-content:space-between;
+  padding:12px 14px;
+  border-radius:12px;
+  background:rgba(15,23,42,.6);
+  font-size:14px
+}
+.log-time{color:#6b7280;font-size:12px}
+.log-admin{color:#22d3ee;font-weight:bold}
+
+/* ===== STEP 7: USER BADGE ===== */
+.user-badge{
+  position:fixed;
+  top:64px;
+  right:20px;
+  background:rgba(15,23,42,.9);
+  border:1px solid rgba(34,211,238,.25);
+  padding:8px 14px;
+  border-radius:14px;
+  font-size:13px;
+  z-index:1090;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.user-badge .role{
+  padding:3px 8px;
+  border-radius:10px;
+  font-size:11px;
+  font-weight:bold;
+}
+
+.role.owner{background:#22d3ee;color:#022c22}
+.role.admin{background:#10b981;color:#022c22}
+.role.mod{background:#6366f1;color:#fff}
+.role.viewer{background:#374151;color:#9ca3af}
+
+/* ================= ROLE PERMISSIONS ================= */
+
+/* ================= LOG TYPE COLORS ================= */
+
+.log-row[data-type="admin"] {
+  border-left: 4px solid #ef4444;
+}
+
+.log-row[data-type="player"] {
+  border-left: 4px solid #22d3ee;
+}
+
+.log-row[data-type="economy"] {
+  border-left: 4px solid #10b981;
+}
+
+.log-row[data-type="system"] {
+  border-left: 4px solid #a855f7;
+}
+
+/* Optional glow */
+.log-row[data-type="admin"] .log-admin { color: #ef4444 }
+.log-row[data-type="player"] .log-admin { color: #22d3ee }
+.log-row[data-type="economy"] .log-admin { color: #10b981 }
+.log-row[data-type="system"] .log-admin { color: #a855f7 }
+
+.user-badge{
+  position:fixed;
+  top:64px;
+  right:16px;
+  background:rgba(2,6,23,.95);
+  border:1px solid rgba(34,211,238,.3);
+  border-radius:14px;
+  padding:10px 14px;
+  font-size:13px;
+  z-index:1090;
+}
+
+.user-badge .role{
+  margin-left:6px;
+  padding:2px 8px;
+  border-radius:10px;
+  font-size:11px;
+  font-weight:bold;
+}
+
+.role.owner{background:#22d3ee;color:#022c22}
+.role.admin{background:#10b981;color:#022c22}
+.role.mod{background:#facc15;color:#422006}
+.role.viewer{background:#64748b;color:#020617}
+
+.role {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: bold;
+  margin-left: 8px;
+}
+
+.role.owner { background:#22d3ee; color:#022c22 }
+.role.admin { background:#10b981; color:#022c22 }
+.role.mod   { background:#f59e0b; color:#022c22 }
+.role.viewer{ background:#6b7280; color:#020617 }
+
+/* ================= THEME VARIABLES ================= */
+:root {
+  --bg-main: #020617;
+  --bg-card: #0f172a;
+  --text-main: #e5e7eb;
+  --accent: #22d3ee;
+}
+
+body.light {
+  --bg-main: #f8fafc;
+  --bg-card: #ffffff;
+  --text-main: #0f172a;
+  --accent: #0ea5e9;
+}
+
+/* Apply variables */
+body {
+  background: radial-gradient(circle at top, var(--bg-card), var(--bg-main));
+  color: var(--text-main);
+}
+
+.card {
+  background: var(--bg-card);
+}
+
+.header,
+.sidebar {
+  background: var(--bg-main);
+}
+
+.overlay {
+  pointer-events: none;
+}
+
+.overlay.active {
+  pointer-events: auto;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <div class="menu-btn" onclick="toggleMenu()">☰</div>
+  <div class="header-title">NV:RP Admin</div>
+  <div class="gear" onclick="toggleTheme()" title="Toggle Theme">🌗</div>
+</div>
+
+<div class="user-badge" id="userBadge">
+  Logged in as <strong>Cyan</strong>
+  <span class="role owner">Owner</span>
+</div>
+
+<div class="sidebar" id="sidebar">
+  <a class="active" onclick="showPage('dashboard',this)">🏠 Dashboard</a>
+  <a onclick="showPage('economy',this)">📊 Economy</a>
+  <a onclick="showPage('player',this)">🔍 Player Lookup</a>
+  <a onclick="showPage('events',this)">📅 Events</a>
+  <a onclick="showPage('logs',this)">📄 Logs</a>
+</div>
+
+<div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+
+<div class="content">
+
+<!-- DASHBOARD -->
+<div class="page active" id="dashboard">
+
+  <div class="card">
+    <h2>Server Overview</h2>
+    <div class="grid">
+      <div class="stat">
+        <div class="stat-label">Players</div>
+        <div class="stat-value">124</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Cash</div>
+        <div class="stat-value">₦8,240,000</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Bank</div>
+        <div class="stat-value">₦42,980,000</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Crimes</div>
+        <div class="stat-value">312</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DEV LOGIN SWITCH (TEMP) -->
+  <div class="card">
+  <h3>Dev Login Switch</h3>
+  <button onclick="login('Cyan')">Login as Cyan</button>
+  <button onclick="login('Neo')">Login as Neo</button>
+  <button onclick="login('Echo')">Login as Echo</button>
+</div>
+
+</div>
+
+<!-- ECONOMY -->
+<div class="page" id="economy">
+  <div class="card">
+    <h2>Economy Overview</h2>
+    <div class="grid">
+      <div class="stat"><div class="stat-label">Total Circulation</div><div class="stat-value">₦3,899,940</div></div>
+      <div class="stat"><div class="stat-label">Total Bank</div><div class="stat-value">₦42,980,000</div></div>
+      <div class="stat"><div class="stat-label">Treasury</div><div class="stat-value muted">₦0</div></div>
+      <div class="stat"><div class="stat-label">24h Change</div><div class="stat-value red">-99.72%</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Wealth Distribution</h2>
+    <div class="chart-box">Donut Chart (UI Placeholder)</div>
+  </div>
+
+  <div class="card">
+    <h2>Top Vehicles</h2>
+    <div class="bar-chart">
+      <div class="bar" style="height:60%"></div>
+      <div class="bar" style="height:90%"></div>
+      <div class="bar" style="height:45%"></div>
+      <div class="bar" style="height:75%"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Wealthiest Players</h2>
+    <div class="list">
+      <div class="list-row">JUST_MIDE <span>₦1,000,000</span></div>
+      <div class="list-row">Mr_Vibez <span>₦1,000,000</span></div>
+      <div class="list-row">Mr_Abolo <span>₦899,940</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- PLAYER -->
+<div class="page" id="player">
+
+  <div class="card">
+    <h2>Player Lookup</h2>
+    <input placeholder="Enter username">
+    <button disabled>Search (UI only)</button>
+  </div>
+
+  <div class="card">
+    <h2>Mr_Abolo</h2>
+    <p class="muted">Last Login: 2026-01-02 21:43</p>
+    <p>Faction: Police Department (Rank 3)</p>
+  </div>
+
+  <div class="card">
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('overview',this)">Overview</button>
+    <button class="tab" onclick="switchTab('economyTab',this)">Economy</button>
+    <button class="tab" onclick="switchTab('assets',this)">Assets</button>
+    <button class="tab" onclick="switchTab('activity',this)">Activity</button>
+
+    <!-- STEP 8: role-aware Admin tab -->
+    <button class="tab admin" data-role="admin"
+            onclick="switchTab('admin',this)">
+      Admin
+    </button>
+  </div>
+</div>
+
+  <div class="card tab-page active" id="overview">
+    <div class="grid">
+      <div class="stat"><div class="stat-label">Level</div><div class="stat-value">12</div></div>
+      <div class="stat"><div class="stat-label">Hours</div><div class="stat-value">148</div></div>
+      <div class="stat"><div class="stat-label">Warnings</div><div class="stat-value">0</div></div>
+      <div class="stat"><div class="stat-label">Wanted</div><div class="stat-value">0</div></div>
+    </div>
+  </div>
+
+  <div class="card tab-page" id="economyTab">
+    <div class="grid">
+      <div class="stat"><div class="stat-label">Cash</div><div class="stat-value">₦120,000</div></div>
+      <div class="stat"><div class="stat-label">Bank</div><div class="stat-value">₦1,450,000</div></div>
+      <div class="stat"><div class="stat-label">Paycheck</div><div class="stat-value">₦0</div></div>
+      <div class="stat"><div class="stat-label">Dirty Money</div><div class="stat-value">₦0</div></div>
+    </div>
+  </div>
+
+  <div class="card tab-page" id="assets">
+    <div class="list">
+      <div class="list-row">Infernus <span>GCRP01</span></div>
+      <div class="list-row">Sultan <span>GCRP88</span></div>
+      <div class="list-row">NRG-500 <span>BIKE01</span></div>
+    </div>
+  </div>
+
+  <div class="card tab-page" id="activity">
+    <div class="list">
+      <div class="list-row">Bought Infernus <span>₦250,000</span></div>
+      <div class="list-row">Arrested (Speeding)</div>
+      <div class="list-row">Joined Police Faction</div>
+    </div>
+  </div>
+
+  <div class="card tab-page" id="admin">
+  <button data-role="admin" onclick="openAdminModal('Give Warning')">
+  Give Warning
+</button>
+<button data-role="admin" onclick="adminAction('Jail Player')">Jail Player</button>
+<button data-role="owner" onclick="adminAction('Edit Money')">Edit Money</button>
+</div>
+
+</div>
+
+<div class="page" id="events"><div class="card"><h2>Events</h2></div></div>
+<!-- LOGS PAGE -->
+<div class="page" id="logs">
+  <div class="card">
+    <h2>Server Logs</h2>
+
+    <div class="log-filters">
+  <select id="logFilter">
+    <option value="all">All Logs</option>
+    <option value="admin">Admin Actions</option>
+    <option value="player">Player Actions</option>
+    <option value="economy">Economy</option>
+    <option value="system">System</option>
+  </select>
+
+  <input id="logSearch" placeholder="Search logs...">
+</div>
+
+    <div class="logs-list">
+
+  <div class="log-group" data-group="today">
+    <div class="log-group-title">Today</div>
+  </div>
+
+  <div class="log-group" data-group="yesterday">
+    <div class="log-group-title">Yesterday</div>
+  </div>
+
+  <div class="log-group" data-group="older">
+    <div class="log-group-title">Older</div>
+  </div>
+      <div class="log-row" data-type="admin" data-text="give warning cyan">
+  <div>
+    <div class="log-admin">Admin: Cyan</div>
+    Give Warning executed
+  </div>
+  <div class="log-time" data-time=""></div>
+</div>
+
+<div class="log-row"
+     data-type="admin"
+     data-text="give warning cyan"
+     data-timestamp="">
+  <div>
+    <div class="log-admin">Admin: Cyan</div>
+    Edit Money executed
+  </div>
+  <div class="log-time">Just now</div>
+</div>
+
+<div class="log-row" data-type="player" data-text="jailed mr_abolo">
+  <div>
+    <div class="log-admin">Admin: Cyan</div>
+    Jailed Mr_Abolo (10 mins)
+  </div>
+  <div class="log-time">2 mins ago</div>
+</div>
+
+<div class="log-row" data-type="economy" data-text="economy reset">
+  <div>
+    <div class="log-admin">System</div>
+    Economy reset executed
+  </div>
+  <div class="log-time">18 mins ago</div>
+</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<!-- ADMIN MODAL -->
+<div class="admin-modal-overlay" id="adminModal">
+  <div class="admin-modal">
+    <h3 id="adminModalTitle">Confirm</h3>
+    <p id="adminModalText"></p>
+    <div class="admin-modal-actions">
+      <button class="admin-cancel" onclick="closeAdminModal()">Cancel</button>
+      <button class="admin-confirm" onclick="confirmAdminAction()">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<script>
+
+const logPermissions = {
+  owner: ["admin", "player", "economy", "system"],
+  admin: ["admin", "player", "economy"],
+  mod: ["player"],
+  viewer: []
+};
+
+const users = {
+  Cyan: { name: "Cyan", role: "owner" },
+  Neo: { name: "Neo", role: "admin" },
+  Echo: { name: "Echo", role: "mod" }
+};
+
+let currentUser = users.owner;
+
+const roleRank = {
+  owner: 4,
+  admin: 3,
+  mod: 2,
+  viewer: 1
+};
+
+const logsLink = [...document.querySelectorAll(".sidebar a")]
+  .find(a => a.textContent.includes("Logs"));
+
+if (logsLink) {
+  logsLink.style.display =
+    currentUser.role === "viewer" ? "none" : "block";
+}
+
+const sidebar=document.getElementById("sidebar");
+const overlay=document.getElementById("overlay");
+let pendingAdminAction=null;
+
+function toggleMenu(){
+  sidebar.classList.toggle("active");
+  overlay.classList.toggle("active");
+}
+
+function showPage(id, el) {
+  hideAllPages();
+
+  const page = document.getElementById(id);
+  page.classList.add("active");
+  page.style.display = "block";
+
+  document.querySelectorAll(".sidebar a").forEach(a =>
+    a.classList.remove("active")
+  );
+  el.classList.add("active");
+
+  applyLogPermissions();
+
+  if (window.innerWidth < 768) toggleMenu();
+}
+
+function hideAllPages() {
+  document.querySelectorAll(".page").forEach(p => {
+    p.classList.remove("active");
+    p.style.display = "none";
+  });
+}
+
+function switchTab(id,el){
+  document.querySelectorAll(".tab-page").forEach(t=>t.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  document.querySelectorAll(".tab").forEach(b=>b.classList.remove("active"));
+  el.classList.add("active");
+}
+
+function openAdminModal(action){
+  pendingAdminAction = action;
+
+  document.getElementById("adminModalTitle").innerText = action;
+
+  document.getElementById("adminModalText").innerHTML = `
+    <strong>${currentUser.name}</strong>
+    <span class="role ${currentUser.role}">
+      ${currentUser.role.toUpperCase()}
+    </span>
+    <br><br>
+    Confirm <strong>${action}</strong> action
+  `;
+
+  document.getElementById("adminModal").classList.add("active");
+}
+
+function closeAdminModal(){
+  document.getElementById("adminModal").classList.remove("active");
+}
+
+
+ function confirmAdminAction(){
+  if (!pendingAdminAction) return;
+
+  fetch("https://soc-kvmz.onrender.com/logs", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      type: "admin",
+      author: `${currentUser.role.toUpperCase()}: ${currentUser.name}`,
+      message: `${pendingAdminAction} executed`
+    })
+  })
+  .then(() => {
+    // optional: refresh logs from backend
+    loadLogsFromAPI();
+  });
+
+  closeAdminModal();
+}
+
+function adminAction(action){
+  const requiredRole =
+    action === "Edit Money" ? "owner" : "admin";
+
+  if (roleRank[currentUser.role] < roleRank[requiredRole]) {
+    addLog(
+      "system",
+      `Permission denied: ${action}`,
+      "System"
+    );
+    alert("You do not have permission to do this.");
+    return;
+  }
+
+  openAdminModal(action);
+}
+
+function addLog(type, message, author) {
+  const now = Date.now();
+
+  const row = document.createElement("div");
+  row.className = "log-row";
+  row.dataset.type = type;
+  row.dataset.text = message.toLowerCase();
+  row.dataset.timestamp = now;
+
+  row.innerHTML = `
+    <div>
+      <div class="log-admin">${author || "System"}</div>
+      ${message}
+    </div>
+    <div class="log-time">Just now</div>
+  `;
+
+  const group = getLogGroup(now);
+  group.prepend(row);
+
+  updateLogTimes();
+  applyLogPermissions();
+}
+
+function getLogGroup(timestamp) {
+  const now = new Date();
+  const logDate = new Date(Number(timestamp));
+
+  const startOfToday = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate()
+  );
+
+  const startOfYesterday = new Date(startOfToday);
+  startOfYesterday.setDate(startOfYesterday.getDate() - 1);
+
+  if (logDate >= startOfToday) {
+    return document.querySelector('[data-group="today"]');
+  }
+
+  if (logDate >= startOfYesterday) {
+    return document.querySelector('[data-group="yesterday"]');
+  }
+
+  return document.querySelector('[data-group="older"]');
+}
+
+/* ================= STEP 15: LOG PERSISTENCE ================= */
+
+
+function applyRolePermissions() {
+  // Role-based UI permissions
+  document.querySelectorAll("[data-role]").forEach(el => {
+    const requiredRole = el.dataset.role;
+
+    if (roleRank[currentUser.role] < roleRank[requiredRole]) {
+      el.style.display = "none";
+    } else {
+      el.style.display = "";
+    }
+  });
+
+  // Logs sidebar link
+  const logsLink = [...document.querySelectorAll(".sidebar a")]
+    .find(a => a.textContent.includes("Logs"));
+
+  if (logsLink) {
+    logsLink.style.display =
+      currentUser.role === "viewer" ? "none" : "";
+  }
+
+  applyLogPermissions();
+}
+
+function updateLogTimes(){
+  document.querySelectorAll(".log-row").forEach(log => {
+    // ✅ Ensure timestamp exists
+    if (!log.dataset.timestamp) {
+      log.dataset.timestamp = Date.now();
+    }
+
+    const ts = Number(log.dataset.timestamp);
+    const timeEl = log.querySelector(".log-time");
+
+    if (timeEl) {
+      timeEl.innerText = timeAgo(ts);
+    }
+  });
+}
+
+updateLogTimes();
+setInterval(updateLogTimes, 15000);
+
+function timeAgo(ts){
+  const seconds = Math.floor((Date.now() - ts) / 1000);
+
+  if (seconds < 5) return "Just now";
+  if (seconds < 60) return `${seconds}s ago`;
+
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes} min${minutes>1?"s":""} ago`;
+
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours} hour${hours>1?"s":""} ago`;
+
+  const days = Math.floor(hours / 24);
+  return `${days} day${days>1?"s":""} ago`;
+}
+
+function applyLogPermissions(){
+  const allowed = logPermissions[currentUser.role] || [];
+
+  document.querySelectorAll(".log-row").forEach(log=>{
+    log.style.display = "flex"; // reset first
+
+    const type = log.dataset.type;
+    if (!allowed.includes(type)) {
+      log.style.display = "none";
+    }
+  });
+}
+
+function updateUserBadge() {
+  const badge = document.getElementById("userBadge");
+  if (!badge) return;
+
+  badge.innerHTML = `
+    Logged in as <strong>${currentUser.name}</strong>
+    <span class="role ${currentUser.role}">
+      ${currentUser.role.toUpperCase()}
+    </span>
+  `;
+}
+
+function toggleMenu() {
+  const sidebar = document.getElementById("sidebar");
+  const overlay = document.getElementById("overlay");
+
+  const isOpen = sidebar.classList.contains("active");
+
+  if (isOpen) {
+    sidebar.classList.remove("active");
+    overlay.classList.remove("active");
+  } else {
+    sidebar.classList.add("active");
+    overlay.classList.add("active");
+  }
+}
+
+function toggleTheme() {
+  const isLight = document.body.classList.toggle("light");
+  localStorage.setItem("nv_theme", isLight ? "light" : "dark");
+}
+
+/* Load saved theme */
+(function loadTheme(){
+  const saved = localStorage.getItem("nv_theme");
+  if (saved === "light") {
+    document.body.classList.add("light");
+  }
+})();
+
+function switchUser(role) {
+  if (!users[role]) return;
+
+  currentUser = users[role];
+
+  updateUserBadge();
+  applyRolePermissions();
+}
+
+function loadLogsFromAPI(){
+  fetch("https://soc-kvmz.onrender.com/logs")
+    .then(res => res.json())
+    .then(data => {
+      const container = document.querySelector(".logs-list");
+      if (!container) return;
+
+      container.innerHTML = "";
+
+      data.forEach(log => {
+        const row = document.createElement("div");
+        row.className = "log-row";
+        row.dataset.type = log.type;
+        row.dataset.text = log.message.toLowerCase();
+        row.dataset.timestamp = log.timestamp;
+
+        row.innerHTML = `
+          <div>
+            <div class="log-admin">${log.author}</div>
+            ${log.message}
+          </div>
+          <div class="log-time"></div>
+        `;
+
+        container.appendChild(row);
+      });
+
+      updateLogTimes();
+      applyLogPermissions();
+    });
+}
+
+function login(username){
+  fetch("https://soc-kvmz.onrender.com/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username })
+  })
+  .then(res => {
+    console.log("STATUS:", res.status);
+    return res.json();
+  })
+  .then(data => {
+    console.log("DATA:", data);
+
+    if (data.error) {
+      alert("Login failed: " + data.error);
+      return;
+    }
+
+    currentUser = data;
+    updateUserBadge();
+    applyRolePermissions();
+    alert("Logged in as " + data.name);
+  })
+  .catch(err => {
+    console.error(err);
+    alert("Login failed (network)");
+  });
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const logFilter = document.getElementById("logFilter");
+  const logSearch = document.getElementById("logSearch");
+
+  if (!logFilter || !logSearch) return;
+
+  function filterLogs() {
+    const filterValue = logFilter.value;
+    const searchValue = logSearch.value.toLowerCase();
+    const allowed = logPermissions[currentUser.role] || [];
+
+    document.querySelectorAll(".log-row").forEach(log => {
+      const type = log.dataset.type;
+      const text = log.dataset.text || "";
+
+      const matchType = filterValue === "all" || filterValue === type;
+      const matchText = text.includes(searchValue);
+      const matchRole = allowed.includes(type);
+
+      log.style.display =
+        matchType && matchText && matchRole ? "flex" : "none";
+    });
+  }
+
+  logFilter.addEventListener("change", filterLogs);
+  logSearch.addEventListener("input", filterLogs);
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("sidebar")?.classList.remove("active");
+  document.getElementById("overlay")?.classList.remove("active");
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+  hideAllPages();
+
+  const dashboard = document.getElementById("dashboard");
+  dashboard.classList.add("active");
+  dashboard.style.display = "block";
+
+  updateUserBadge();        // ✅ correct
+  applyRolePermissions();
+  updateLogTimes();
+});
+</script>
+
+</body>
+</html>
