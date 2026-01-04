@@ -926,12 +926,16 @@ function updateUserBadge() {
 }
 
 function toggleMenu(){
-  sidebar.classList.toggle("active");
+  const sidebar = document.getElementById("sidebar");
+  const overlay = document.getElementById("overlay");
+
+  if (!sidebar || !overlay) return;
+
+  const isOpen = sidebar.classList.toggle("active");
   overlay.classList.toggle("active");
 
-  // 🔥 FORCE mobile repaint
-  document.body.style.overflow =
-    sidebar.classList.contains("active") ? "hidden" : "";
+  // Mobile-safe scroll lock
+  document.body.style.overflow = isOpen ? "hidden" : "";
   }
 
 function toggleTheme() {
@@ -1066,3 +1070,4 @@ document.addEventListener("DOMContentLoaded", () => {
 </body>
 
 </html>
+
